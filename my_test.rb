@@ -5,8 +5,11 @@ require 'faker'
 class SampleTest < Test::Unit::TestCase
 
   def setup
-    @form_url = 'https://docs.google.com/forms/d/181whJlBduFo5qtDbxkBDWHjNQML5RutvHWOCjEFWswY/viewform'
-    @form_submission_confirmation_url = 'https://docs.google.com/forms/d/181whJlBduFo5qtDbxkBDWHjNQML5RutvHWOCjEFWswY/formResponse'
+    @form_url =
+        'https://docs.google.com/forms/d/181whJlBduFo5qtDbxkBDWHjNQML5RutvHWOCjEFWswY/viewform'
+    @form_submission_confirmation_url =
+        'https://docs.google.com/forms/d/181whJlBduFo5qtDbxkBDWHjNQML5RutvHWOCjEFWswY/formResponse'
+
     @driver = Selenium::WebDriver.for :chrome
     @driver.navigate.to @form_url
     @name_field = @driver.find_element(:id, 'entry_1041466219')
@@ -59,7 +62,7 @@ class SampleTest < Test::Unit::TestCase
 
   # Verify that "Do you enjoy development?" question is required by confirming
   # that the user is not brought to the next screen and that the error
-  # notification is displayed
+  # notification is displayed on the entry group.
   def test_development_enjoyment_is_required
     @name_field.send_keys Faker::Name.name
     @comments_entry.send_keys Faker::Lorem.paragraphs
