@@ -28,22 +28,22 @@ class TestBasicWebForm < Test::Unit::TestCase
   # 1) the user is brought to the next screen
   # 2) the response message is displayed
   # 3) the message is as expected.
-  def test_form_submission_and_recording
+  def test_form_submission_all_fields_filled
     @name_field.send_keys Faker::Name.name
     @enjoy_development_yes_option.click
     @framework_selection.select_by(:text, 'Cucumber')
     @comments_field.send_keys Faker::Lorem.paragraphs
     @submit_button.click
 
-    assert_equal(@driver.current_url, FORM_RESPONSE_URL,
+    assert_equal(FORM_RESPONSE_URL, @driver.current_url,
                  'The form failed to submit')
 
     response_message = @driver.find_element(:class, 'ss-resp-message')
-
     assert_true(response_message.displayed?,
                 'Form submission confirmation message is not displayed')
 
-    assert_equal(response_message.text, 'Your response has been recorded.',
+    assert_equal('Your response has been recorded.',
+                 response_message.text,
                 'Form submission confirmation screen does not have expected user message')
   end
 
@@ -57,8 +57,8 @@ class TestBasicWebForm < Test::Unit::TestCase
     @framework_selection.select_by(:text, 'JUnit')
     @submit_button.click
 
-    assert_equal(@driver.current_url,
-                 FORM_URL,
+    assert_equal(FORM_URL,
+                 @driver.current_url,
                  'The next page loaded when a required field was not entered')
 
     container_div = @enjoy_development_yes_option
