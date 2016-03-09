@@ -2,7 +2,7 @@ require 'test/unit'
 require 'selenium-webdriver'
 require 'faker'
 
-class FormSubmissionTest < Test::Unit::TestCase
+class TestBasicWebForm < Test::Unit::TestCase
 
   FORM_URL =
       'https://docs.google.com/forms/d/181whJlBduFo5qtDbxkBDWHjNQML5RutvHWOCjEFWswY/viewform'
@@ -48,7 +48,7 @@ class FormSubmissionTest < Test::Unit::TestCase
                 'Form submission confirmation screen does not have expected user message')
   end
 
-  # Verify that "Do you enjoy development?" question is required by confirming
+  # Verify that 'Do you enjoy development?' question is required by confirming
   # that:
   # 1) the user remains on the form
   # 2) the error notification is displayed on the entry group.
@@ -60,12 +60,12 @@ class FormSubmissionTest < Test::Unit::TestCase
 
     assert_equal(@driver.current_url,
                  FORM_URL,
-                 "The next page loaded when a required field was not entered")
+                 'The next page loaded when a required field was not entered')
 
     container_div = @enjoy_development_yes_option
                         .find_element(:xpath,
                                       'ancestor::div[@class="ss-form-entry"]')
     required_message = container_div.find_element(:class, 'required-message')
-    assert_true(required_message.displayed?, "Error message not displayed")
+    assert_true(required_message.displayed?, 'Error message not displayed')
   end
 end
