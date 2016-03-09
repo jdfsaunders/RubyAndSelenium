@@ -15,7 +15,7 @@ class TestBasicWebForm < Test::Unit::TestCase
     @name_field = @driver.find_element(:id, 'entry_1041466219')
     @enjoy_development_yes_option = @driver.find_element(:id, 'group_310473641_1')
     @framework_selection = Selenium::WebDriver::Support::Select.new(@driver.find_element(:id, 'entry_262759813'))
-    @comments_entry = @driver.find_element(:id, 'entry_649813199')
+    @comments_field = @driver.find_element(:id, 'entry_649813199')
     @submit_button = @driver.find_element(:id, 'ss-submit')
   end
 
@@ -29,21 +29,20 @@ class TestBasicWebForm < Test::Unit::TestCase
   # 2) the response message is displayed
   # 3) the message is as expected.
   def test_form_submission_and_recording
-    name_entered = Faker::Name.name
-    @name_field.send_keys name_entered
+    @name_field.send_keys Faker::Name.name
     @enjoy_development_yes_option.click
     @framework_selection.select_by(:text, 'Cucumber')
-
-    comment_entered = Faker::Lorem.paragraph
-    @comments_entry.send_keys comment_entered
+    @comments_field.send_keys Faker::Lorem.paragraphs
     @submit_button.click
 
     assert_equal(@driver.current_url, FORM_RESPONSE_URL,
                  'The form failed to submit')
 
     response_message = @driver.find_element(:class, 'ss-resp-message')
+
     assert_true(response_message.displayed?,
                 'Form submission confirmation message is not displayed')
+
     assert_equal(response_message.text, 'Your response has been recorded.',
                 'Form submission confirmation screen does not have expected user message')
   end
@@ -54,7 +53,7 @@ class TestBasicWebForm < Test::Unit::TestCase
   # 2) the error notification is displayed on the entry group.
   def test_development_enjoyment_is_required
     @name_field.send_keys Faker::Name.name
-    @comments_entry.send_keys Faker::Lorem.paragraphs
+    @comments_field.send_keys Faker::Lorem.paragraphs
     @framework_selection.select_by(:text, 'JUnit')
     @submit_button.click
 
@@ -65,7 +64,9 @@ class TestBasicWebForm < Test::Unit::TestCase
     container_div = @enjoy_development_yes_option
                         .find_element(:xpath,
                                       'ancestor::div[@class="ss-form-entry"]')
+
     required_message = container_div.find_element(:class, 'required-message')
+
     assert_true(required_message.displayed?, 'Error message not displayed')
   end
 end
