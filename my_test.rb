@@ -20,7 +20,9 @@ class SampleTest < Test::Unit::TestCase
     @driver.quit
   end
 
-  # Verify that a form can be submitted when all fields are filled out.
+  # Verify that a form can be submitted when all fields are completed by
+  # confirming that the user is brought to the next screen, the response
+  # message is displayed, and the message is as expected.
   # Data recording is also partially verified by checking that the name and
   # comment left by the user are present on the results page.  This may make
   # more sense as a separate test case. Due to being unable to clear existing
@@ -38,9 +40,11 @@ class SampleTest < Test::Unit::TestCase
 
     assert_equal(@driver.current_url, @form_submission_confirmation_url,
                 'The form failed to submit')
-    assert_true(@driver.find_element(:class, 'ss-resp-message').displayed?,
+
+    response_message = @driver.find_element(:class, 'ss-resp-message')
+    assert_true(response_message.displayed?,
                 'Form submission confirmation message is not displayed')
-    assert_true(@driver.page_source.include?('Your response has been recorded.'),
+    assert_equal(response_message.text, 'Your response has been recorded.',
                 'Form submission confirmation screen does not have expected user message')
 
     result_url = @driver.find_element(:link_text, 'See previous responses')
@@ -53,7 +57,7 @@ class SampleTest < Test::Unit::TestCase
                 "The submitter's comment was not saved")
   end
 
-  # Test that when the user omits the "Do you enjoy development?" question
+  # Verify that "Do you enjoy development?" question is required by confirming
   # that the user is not brought to the next screen and that the error
   # notification is displayed
   def test_development_enjoyment_is_required
