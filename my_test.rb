@@ -5,10 +5,12 @@ require 'faker'
 class SampleTest < Test::Unit::TestCase
 
   def setup
+    @form_url = 'https://docs.google.com/forms/d/181whJlBduFo5qtDbxkBDWHjNQML5RutvHWOCjEFWswY/viewform'
+    @form_submission_confirmation_url = 'https://docs.google.com/forms/d/181whJlBduFo5qtDbxkBDWHjNQML5RutvHWOCjEFWswY/formResponse'
     @driver = Selenium::WebDriver.for :chrome
-    @driver.navigate.to 'https://docs.google.com/forms/d/181whJlBduFo5qtDbxkBDWHjNQML5RutvHWOCjEFWswY/viewform'
+    @driver.navigate.to @form_url
     @name_field = @driver.find_element(:id, 'entry_1041466219')
-    @yes_option = @driver.find_element(:id, 'group_310473641_1')
+    @enjoy_development_yes_option = @driver.find_element(:id, 'group_310473641_1')
     @framework_selection = Selenium::WebDriver::Support::Select.new(@driver.find_element(:id, 'entry_262759813'))
     @comments_entry = @driver.find_element(:id, 'entry_649813199')
     @submit_button = @driver.find_element(:id, 'ss-submit')
@@ -18,20 +20,28 @@ class SampleTest < Test::Unit::TestCase
     @driver.quit
   end
 
-  # Test that a form can be submitted when all fields are filled out and that
-  # the submitter's name & comment are recorded.
+  # Verify that a form can be submitted when all fields are filled out.
+  # Data recording is also partially verified by checking that the name and
+  # comment left by the user are present on the results page.  This may make
+  # more sense as a separate test case. Due to being unable to clear existing
+  # data, the development enjoyment question and favourite framework results
+  # are not checked.
   def test_form_submission_and_recording
     name_entered = Faker::Name.name
     @name_field.send_keys name_entered
-    @yes_option.click
+    @enjoy_development_yes_option.click
     @framework_selection.select_by(:text, 'Cucumber')
 
     comment_entered = Faker::Lorem.paragraph
     @comments_entry.send_keys comment_entered
     @submit_button.click
 
-    assert(@driver.page_source.include?('Your response has been recorded.'),
-           'The Form failed to submit')
+    assert_equal(@driver.current_url, @form_submission_confirmation_url,
+                'The form failed to submit')
+    assert_true(@driver.find_element(:class, 'ss-resp-message').displayed?,
+                'Form submission confirmation message is not displayed')
+    assert_true(@driver.page_source.include?('Your response has been recorded.'),
+                'Form submission confirmation screen does not have expected user message')
 
     result_url = @driver.find_element(:link_text, 'See previous responses')
                      .attribute('href')
@@ -43,15 +53,19 @@ class SampleTest < Test::Unit::TestCase
                 "The submitter's comment was not saved")
   end
 
-  # Test that user is notified after submitting the form with neither option
-  # selected for the developer preference question
-  def test_development_preference_is_required
+  # Test that when the user omits the "Do you enjoy development?" question
+  # that the user is not brought to the next screen and that the error
+  # notification is displayed
+  def test_development_enjoyment_is_required
     @name_field.send_keys Faker::Name.name
     @comments_entry.send_keys Faker::Lorem.paragraphs
     @framework_selection.select_by(:text, 'JUnit')
     @submit_button.click
 
-    container_div = @yes_option
+    assert_equal(@driver.current_url, @form_url,
+                 "The next page loaded when a required field was not entered")
+
+    container_div = @enjoy_development_yes_option
                         .find_element(:xpath,
                                       'ancestor::div[@class="ss-form-entry"]')
     required_message = container_div.find_element(:class, 'required-message')
